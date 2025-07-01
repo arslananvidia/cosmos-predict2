@@ -83,8 +83,16 @@ torchrun --nproc_per_node=8 --master_port=12341 -m scripts.train --config=cosmos
 ### Option 3: 14B Model (Requires More GPU Memory)
 ```bash
 source setup_training_env.sh
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export EXP=predict2_video2world_training_14b_metropolis
-torchrun --nproc_per_node=8 --master_port=12341 -m scripts.train --config=cosmos_predict2/configs/base/config.py -- experiment=${EXP}
+export WANDB_ENTITY=nvidia-dir
+export WANDB_API_KEY=d06eb702b1a5d31496a0ab288f8c84e2ae55510d
+export WANDB_PROJECT="cosmos_predict2"
+export WANDB_RUN_NAME="14b_metropolis_reduced_res"
+export WANDB_MODE="online"
+
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True && export EXP=predict2_video2world_training_14b_metropolis && torchrun --nproc_per_node=8 --master_port=12341 -m scripts.train --config=cosmos_predict2/configs/base/config.py -- experiment=${EXP} dataloader_train.dataset.video_size=[480,640] 
+
 ```
 
 ## File Structure After Training
