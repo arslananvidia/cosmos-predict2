@@ -35,7 +35,7 @@ cs = ConfigStore.instance()
 
 # Metropolis dataset example
 example_video_dataset_metropolis = L(Dataset)(
-    dataset_dir="datasets/metropolis/train",
+    dataset_dir="datasets/watermark/train",
     num_frames=93,  # Standard frame count, will be cropped/padded as needed
     video_size=(740, 1280),  # Height, Width format - matches your 1280x740 videos
 )
