@@ -81,7 +81,7 @@ predict2_video2world_training_2b_metropolis = dict(
         callbacks=dict(
             iter_speed=dict(hit_thres=10),  # Report speed every 10 iterations
         ),
-        max_iter=2000,  # Increased iterations for larger dataset (1,191 samples)
+        max_iter=10000,  # Increased iterations for larger dataset (1,191 samples)
     ),
     checkpoint=dict(
         save_iter=500,  # Save checkpoint every 500 iterations
