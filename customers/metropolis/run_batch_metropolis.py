@@ -23,12 +23,13 @@ import subprocess
 import argparse
 from pathlib import Path
 import glob
+import re
 
 # ------------------------------------------------------------------
 # CONFIG – adjust only if your paths / flags change
 # ------------------------------------------------------------------
-FRAMES_DIR  = Path("datasets/metropolis/benchmark/v2/frames_1280x704")
-PROMPTS_DIR = Path("datasets/metropolis/benchmark/v2/prompts")
+FRAMES_DIR  = Path("datasets/metropolis/benchmark/v2/clean/clean_1280x704")
+PROMPTS_DIR = Path("datasets/metropolis/benchmark/v2/clean/prompts_1")
 OUTPUT_DIR  = Path("output")
 NUM_GPUS    = int(os.getenv("NUM_GPUS", 8))
 TORCHRUN    = "torchrun"                             # or full path if needed
@@ -105,6 +106,14 @@ Examples:
     
     return parser.parse_args()
 
+def extract_iteration_number(dit_path: str) -> str:
+    """Extract iteration number from checkpoint path."""
+    # Match pattern like 'iter_000003000.pt'
+    match = re.search(r'iter_(\d+)\.pt', dit_path)
+    if match:
+        return match.group(1)
+    return "unknown"
+
 def load_prompt(prompt_file: Path) -> str:
     """Load prompt text from file, returning first non-empty line."""
     try:
@@ -176,12 +185,14 @@ def main() -> None:
     
     # Print configuration
     inference_type = "LoRA" if args.lora else "Standard"
+    iteration_num = extract_iteration_number(config["dit_path"])
     print(f"{'='*60}")
     print(f"BATCH METROPOLIS INFERENCE - {inference_type} Mode")
     print(f"{'='*60}")
     print(f"Script: {config['script']}")
     print(f"Model Size: {config['model_size']}")
     print(f"Checkpoint: {config['dit_path']}")
+    print(f"Iteration: {iteration_num}")
     if args.lora:
         print(f"LoRA Rank: {config['lora_rank']}")
         print(f"LoRA Alpha: {config['lora_alpha']}")
@@ -194,9 +205,9 @@ def main() -> None:
     if not PROMPTS_DIR.exists():
         raise FileNotFoundError(f"Prompts directory not found: {PROMPTS_DIR}")
 
-    # Create output directory with inference type suffix
+    # Create output directory with inference type and iteration suffix
     output_suffix = "_lora" if args.lora else "_standard"
-    output_dir = OUTPUT_DIR / f"metropolis_batch{output_suffix}"
+    output_dir = OUTPUT_DIR / f"metropolis_batch{output_suffix}_iter_{iteration_num}"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Find all JPG files in the frames directory
