@@ -17,4 +17,10 @@ export NCCL_DEBUG=WARN             # Set to INFO for more detailed logs
 # PyTorch settings
 export PYTHONPATH=$(pwd):$PYTHONPATH
 
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+export WANDB_ENTITY=nvidia-dir
+export WANDB_PROJECT="cosmos_metropolis_predict2"
+export WANDB_RUN_NAME="predict2_v2w_2b_metropolis_rank32_lorafull_lr210_combined_1000_1000"
+export WANDB_MODE="online"
+
 echo "Environment variables set for Cosmos-Predict2 training" 

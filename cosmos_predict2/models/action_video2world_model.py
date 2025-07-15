@@ -66,6 +66,7 @@ class ActionConditionedPredict2Video2WorldModel(Predict2Video2WorldModel):
 
         self.freeze_parameters()
         if config.train_architecture == "lora":
+            log.info(f"========== Adding LoRA to model with rank {config.lora_rank}, alpha {config.lora_alpha}, target modules {config.lora_target_modules}, init_lora_weights {config.init_lora_weights} ==========")
             self.add_lora_to_model(
                 self.pipe.dit,
                 lora_rank=config.lora_rank,

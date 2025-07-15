@@ -49,8 +49,8 @@ dataloader_train_metropolis = L(DataLoader)(
     pin_memory=True,
 )
 
-# torchrun --nproc_per_node=8 --master_port=12341 -m scripts.train --config=cosmos_predict2/configs/base/config.py -- experiment=predict2_video2world_training_2b_metropolis
-predict2_v2w_2b_rank32_lorafull_lr210_combined_1000_1000 = dict(
+# torchrun --nproc_per_node=8 --master_port=12341 -m scripts.train --config=cosmos_predict2/configs/base/config.py -- experiment=predict2_v2w_2b_rank32_loranok_lr210_combined_1000_1000
+predict2_v2w_2b_rank32_loranok_lr210_combined_1000_1000 = dict(
     defaults=[
         {"override /model": "predict2_video2world_fsdp_2b"},
         {"override /optimizer": "fusedadamw"},
@@ -84,7 +84,7 @@ predict2_v2w_2b_rank32_lorafull_lr210_combined_1000_1000 = dict(
         callbacks=dict(
             iter_speed=dict(hit_thres=10),  # Report speed every 10 iterations
         ),
-        max_iter=10000,  # Increased iterations for larger dataset (1,191 samples)
+        max_iter=3000,  # Increased iterations for larger dataset (1,191 samples)
     ),
     checkpoint=dict(
         save_iter=500,  # Save checkpoint every 500 iterations
@@ -103,7 +103,7 @@ predict2_v2w_2b_rank32_lorafull_lr210_combined_1000_1000 = dict(
 # Register configurations
 for _item in [
     # 2b, metropolis
-    predict2_v2w_2b_rank32_lorafull_lr210_combined_1000_1000,
+    predict2_v2w_2b_rank32_loranok_lr210_combined_1000_1000,
 ]:
     # Get the experiment name from the global variable
     experiment_name = [name.lower() for name, value in globals().items() if value is _item][0]

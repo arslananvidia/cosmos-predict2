@@ -84,7 +84,7 @@ predict2_v2w_2b_rank32_loraqkv_only_lr210_combined_1000_1000 = dict(
         callbacks=dict(
             iter_speed=dict(hit_thres=10),  # Report speed every 10 iterations
         ),
-        max_iter=10000,  # Increased iterations for larger dataset (1,191 samples)
+        max_iter=3000,  # Increased iterations for larger dataset (1,191 samples)
     ),
     checkpoint=dict(
         save_iter=500,  # Save checkpoint every 500 iterations

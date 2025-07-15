@@ -1,0 +1,40 @@
+Commands used for Metropolis experiments (Jingyi)
+
+source customers/metropolis/setup_training_env.sh
+export WANDB_API_KEY=xx
+
+# ++++ Experiment 1 ++++
+# dryrun
+torchrun --nproc_per_node=8 --master_port=12341 -m scripts.train --dryrun  --config=cosmos_predict2/configs/base/config.py -- experiment=predict2_v2w_2b_rank32_lorafull_lr210_combined_1000_1000
+
+# training
+export WANDB_RUN_NAME="predict2_v2w_2b_rank32_lorafull_lr210_combined_1000_1000"
+
+torchrun --nproc_per_node=8 --master_port=12341 -m scripts.train --config=cosmos_predict2/configs/base/config.py -- experiment=predict2_v2w_2b_rank32_lorafull_lr210_combined_1000_1000  model.config.train_architecture=lora 
+
+# ++++ Experiment 2 ++++
+export WANDB_RUN_NAME="predict2_v2w_2b_rank32_loraqkv_only_lr210_combined_1000_1000"
+
+torchrun --nproc_per_node=8 --master_port=12341 -m scripts.train --config=cosmos_predict2/configs/base/config.py -- experiment=predict2_v2w_2b_rank32_loraqkv_only_lr210_combined_1000_1000  model.config.train_architecture=lora 
+
+# ++++ Experiment 3 ++++
+export WANDB_RUN_NAME="predict2_v2w_2b_rank32_loranok_lr210_combined_1000_1000"
+
+torchrun --nproc_per_node=8 --master_port=12341 -m scripts.train --config=cosmos_predict2/configs/base/config.py -- experiment=predict2_v2w_2b_rank32_loranok_lr210_combined_1000_1000  model.config.train_architecture=lora 
+
+# ++++ Experiment 4 ++++
+export WANDB_RUN_NAME="predict2_v2w_2b_rank16_lorafull_lr210_combined_1000_1000"
+
+torchrun --nproc_per_node=8 --master_port=12341 -m scripts.train --config=cosmos_predict2/configs/base/config.py -- experiment=predict2_v2w_2b_rank16_lorafull_lr210_combined_1000_1000  model.config.train_architecture=lora 
+
+
+# ++++ Experiment 5 ++++
+export WANDB_RUN_NAME="predict2_v2w_2b_rank16_loraqkv_only_lr210_combined_1000_1000"
+
+torchrun --nproc_per_node=8 --master_port=12341 -m scripts.train --config=cosmos_predict2/configs/base/config.py -- experiment=predict2_v2w_2b_rank16_loraqkv_only_lr210_combined_1000_1000  model.config.train_architecture=lora 
+
+
+# ++++ Experiment 6 ++++
+export WANDB_RUN_NAME="predict2_v2w_2b_rank16_loranok_lr210_combined_1000_1000"
+
+torchrun --nproc_per_node=8 --master_port=12341 -m scripts.train --config=cosmos_predict2/configs/base/config.py -- experiment=predict2_v2w_2b_rank16_loranok_lr210_combined_1000_1000  model.config.train_architecture=lora 
