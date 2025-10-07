@@ -18,6 +18,7 @@ import importlib
 import os
 
 from loguru import logger as logging
+import wandb
 
 from imaginaire.config import Config, pretty_print_overrides
 from imaginaire.lazy_config import instantiate
@@ -32,6 +33,22 @@ def launch(config: Config, args: argparse.Namespace) -> None:
     # a buffer across ranks. If you don't do this, then you end up allocating a bunch of buffers on rank 0, and also that
     # check doesn't actually do anything.
     distributed.init()
+
+    # Initialize wandb for logging (only on rank 0)
+    if distributed.is_rank0():
+        wandb.init(
+            project=config.job.project,
+            group=config.job.group,
+            name=config.job.name,
+            config={
+                "max_iter": config.trainer.max_iter,
+                "logging_iter": config.trainer.logging_iter,
+                "validation_iter": config.trainer.validation_iter,
+                "learning_rate": getattr(config.optimizer, "lr", "unknown"),
+                "batch_size": getattr(config.dataloader_train, "batch_size", "unknown"),
+            }
+        )
+        logging.info(f"Initialized wandb with project: {config.job.project}, group: {config.job.group}, name: {config.job.name}")
 
     # Check that the config is valid
     config.validate()
@@ -49,6 +66,11 @@ def launch(config: Config, args: argparse.Namespace) -> None:
         dataloader_train,
         dataloader_val,
     )
+    
+    # Clean up wandb
+    if distributed.is_rank0() and wandb.run:
+        wandb.finish()
+        logging.info("Finished wandb logging")
 
 
 if __name__ == "__main__":

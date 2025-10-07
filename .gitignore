@@ -5,7 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
-
+*.mp4
+*.json*
 # Distribution / packaging
 .Python
 build/
@@ -77,6 +78,8 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+/wandb/*
 
 # IPython
 profile_default/

@@ -18,6 +18,7 @@ from typing import Tuple
 
 import torch
 import torch.distributed as dist
+import wandb
 
 from imaginaire.model import ImaginaireModel
 from imaginaire.utils import distributed, log
@@ -54,6 +55,7 @@ class LossLog(Callback):
         self.name = self.__class__.__name__
 
         self.train_video_log = _LossRecord()
+        self.val_video_log = _LossRecord()
 
     def on_before_backward(
         self,
@@ -65,7 +67,13 @@ class LossLog(Callback):
         if iteration % (self.config.trainer.logging_iter * self.logging_iter_multipler) == 0 and distributed.is_rank0():
             info = {
                 "train_loss_step": loss.detach().item(),
+                "iteration": iteration,
             }
+            # Log to wandb if available
+            if wandb.run:
+                wandb.log(info, step=iteration)
+            # Also log to console
+            log.info(f"Iteration {iteration}: train_loss_step = {loss.detach().item():.6f}")
 
     def on_training_step_end(
         self,
@@ -98,3 +106,49 @@ class LossLog(Callback):
                 info = {}
                 if iter_count > 0:
                     info[f"train@{self.logging_iter_multipler}/loss"] = loss
+                    info[f"train@{self.logging_iter_multipler}/iter_count"] = iter_count
+                    info["iteration"] = iteration
+                    
+                    # Log to wandb if available
+                    if wandb.run:
+                        wandb.log(info, step=iteration)
+                    # Also log to console
+                    log.info(f"Iteration {iteration}: train_loss_avg = {loss:.6f}, iter_count = {iter_count}")
+
+    def on_validation_step_end(
+        self,
+        model: ImaginaireModel,
+        data_batch: dict[str, torch.Tensor],
+        output_batch: dict[str, torch.Tensor],
+        loss: torch.Tensor,
+        iteration: int = 0,
+    ):
+        """Log validation loss at each validation step."""
+        if not (torch.isnan(loss) or torch.isinf(loss)):
+            _loss = output_batch.get("loss", loss).detach().mean(dim=0)
+            self.val_video_log.iter_count += 1
+            self.val_video_log.loss += _loss
+
+    def on_validation_end(
+        self,
+        model: ImaginaireModel,
+        iteration: int = 0,
+    ):
+        """Log averaged validation loss at the end of validation."""
+        if distributed.is_rank0():
+            world_size = dist.get_world_size()
+            loss, iter_count = self.val_video_log.get_stat()
+            iter_count *= world_size
+
+            if iter_count > 0:
+                info = {
+                    "val/loss": loss,
+                    "val/iter_count": iter_count,
+                    "iteration": iteration,
+                }
+                
+                # Log to wandb if available
+                if wandb.run:
+                    wandb.log(info, step=iteration)
+                # Also log to console
+                log.info(f"Validation at iteration {iteration}: val_loss = {loss:.6f}, iter_count = {iter_count}")
